@@ -166,13 +166,25 @@ public class LexAn implements AutoCloseable {
       return;
     }
 
+    // numbers
+    if (Character.toString(buffChar).matches("[1-9]")) {
+      nextChar();
+      while (Character.isDigit(buffChar)){
+        stringBuilder.append((char) buffChar);
+        nextChar();
+      }
+      buffToken = new Token(location, Token.Symbol.INTCONST, stringBuilder.toString());
+    }
+    
+    // names
     if (Character.toString(buffChar).matches("[a-zA-Z_]")) {
       nextChar();
 			while (buffChar != -1 && Character.toString(buffChar).matches("[a-zA-Z0-9_]")) {
 				stringBuilder.append((char) buffChar);
 				nextChar();
 			}
-
+      
+      // key-words
 			final String name = stringBuilder.toString();
 			final Token.Symbol symbol = switch (name) {
 				case "fun" -> Token.Symbol.FUN;
@@ -211,6 +223,83 @@ public class LexAn implements AutoCloseable {
       buffToken = new Token(location, ONE_CHAR_OPS.get(first), String.valueOf(first));
       return;
     }
+    // character literal
+    if (buffChar == '\'') {
+      nextChar();
+      if (buffChar == '\\') {
+        stringBuilder.append((char) buffChar);
+        nextChar();
+        if (buffChar == '\'' || buffChar == '\\' || buffChar == 'n') {
+          stringBuilder.append((char) buffChar);
+          nextChar();
+        } else if (isHexDigit(buffChar)) {
+          stringBuilder.append((char) buffChar);
+          nextChar();
+          if (isHexDigit(buffChar)) {
+            stringBuilder.append((char) buffChar);
+            nextChar();
+          } else {
+            throw new Report.Error(location, "Invalid hex escape in character literal.");
+          }
+        } else {
+          throw new Report.Error(location, "Invalid escape sequence in character literal.");
+        }
+      } else if (buffChar >= 32 && buffChar <= 126) {
+        stringBuilder.append((char) buffChar);
+        nextChar();
+      } else {
+        throw new Report.Error(location, "Invalid character in character literal.");
+      }
+      if (buffChar != '\'')
+        throw new Report.Error(location, "Missing closing quote in character literal.");
+      stringBuilder.append((char) buffChar);
+      nextChar();
+      buffToken = new Token(new Report.Location(location, new Report.Location(buffCharLine, buffCharColumn - 1)),
+          Token.Symbol.CHARCONST, stringBuilder.toString());
+      return;
+    }
+
+    // string literal
+    if (buffChar == '"') {
+      nextChar();
+      while (buffChar != '"') {
+        if (buffChar == -1 || (buffChar < 32 || buffChar > 126) && buffChar != '\\')
+          throw new Report.Error(location, "Invalid or unterminated string literal.");
+        if (buffChar == '\\') {
+          stringBuilder.append((char) buffChar);
+          nextChar();
+          if (buffChar == '"' || buffChar == '\\' || buffChar == 'n') {
+            stringBuilder.append((char) buffChar);
+            nextChar();
+          } else if (isHexDigit(buffChar)) {
+            stringBuilder.append((char) buffChar);
+            nextChar();
+            if (isHexDigit(buffChar)) {
+              stringBuilder.append((char) buffChar);
+              nextChar();
+            } else {
+              throw new Report.Error(location, "Invalid hex escape in string literal.");
+            }
+          } else {
+            throw new Report.Error(location, "Invalid escape sequence in string literal.");
+          }
+        } else {
+          stringBuilder.append((char) buffChar);
+          nextChar();
+        }
+      }
+      stringBuilder.append((char) buffChar); // closing "
+      nextChar();
+      buffToken = new Token(new Report.Location(location, new Report.Location(buffCharLine, buffCharColumn - 1)),
+          Token.Symbol.STRINGCONST, stringBuilder.toString());
+      return;
+    }
+
+    throw new Report.Error(new Report.Location(buffCharLine, buffCharColumn), "Unknow character: '%c'!".formatted((char) buffChar));
+  }
+
+  private boolean isHexDigit(int c) {
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
   }
 
 	/**
