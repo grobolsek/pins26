@@ -233,10 +233,10 @@ public class LexAn implements AutoCloseable {
         if (buffChar == '\'' || buffChar == '\\' || buffChar == 'n') {
           stringBuilder.append((char) buffChar);
           nextChar();
-        } else if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
+        } else if (Character.toString(buffChar).matches("[A-Fa-f0-9]")) {
           stringBuilder.append((char) buffChar);
           nextChar();
-          if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
+          if (Character.toString(buffChar).matches("[A-Fa-f0-9]")) {
             stringBuilder.append((char) buffChar);
             nextChar();
           } else {
@@ -272,10 +272,10 @@ public class LexAn implements AutoCloseable {
           if (buffChar == '"' || buffChar == '\\' || buffChar == 'n') {
             stringBuilder.append((char) buffChar);
             nextChar();
-          } else if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
+          } else if (Character.toString(buffChar).matches("[A-Fa-f0-9]")) {
             stringBuilder.append((char) buffChar);
             nextChar();
-            if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
+            if (Character.toString(buffChar).matches("[A-Fa-f0-9]")) {
               stringBuilder.append((char) buffChar);
               nextChar();
             } else {
