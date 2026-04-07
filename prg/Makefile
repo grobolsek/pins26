@@ -2,6 +2,6 @@ JAVA		= java --enable-preview
 PHASE		=
 
 .PHONY  : %
-%       : %.pins25
-	$(JAVA) -classpath ../bin pins25.phase.$(PHASE) $<
+%       : %.pins26
+	$(JAVA) -classpath ../bin pins26.phase.$(PHASE) $<
 
