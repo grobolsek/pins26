@@ -81,6 +81,8 @@ public record Token(Report.Location location, Symbol symbol, String lexeme) impl
 		LPAREN,
 		/** Simbol {@code )}. */
 		RPAREN,
+    /** Symbol {@code ;}. */
+    SEMIC,
 	}
 
 	@Override
