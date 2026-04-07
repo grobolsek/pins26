@@ -109,7 +109,7 @@ public class LexAn implements AutoCloseable {
 				return;
 			case '\t': // Prejsnji znak je tabulator, ta znak je morda potisnjen v desno.
 				buffChar = srcFile.read();
-				while (buffCharColumn % 4 != 0)
+				while (buffCharColumn % 8 != 0)
 					buffCharColumn += 1;
 				buffCharColumn += 1;
 				return;
@@ -167,13 +167,14 @@ public class LexAn implements AutoCloseable {
     }
 
     // numbers
-    if (Character.toString(buffChar).matches("[1-9]")) {
+    if (Character.isDigit(buffChar)) {
       nextChar();
       while (Character.isDigit(buffChar)){
         stringBuilder.append((char) buffChar);
         nextChar();
       }
       buffToken = new Token(location, Token.Symbol.INTCONST, stringBuilder.toString());
+      return;
     }
     
     // names
@@ -232,10 +233,10 @@ public class LexAn implements AutoCloseable {
         if (buffChar == '\'' || buffChar == '\\' || buffChar == 'n') {
           stringBuilder.append((char) buffChar);
           nextChar();
-        } else if (isHexDigit(buffChar)) {
+        } else if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
           stringBuilder.append((char) buffChar);
           nextChar();
-          if (isHexDigit(buffChar)) {
+          if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
             stringBuilder.append((char) buffChar);
             nextChar();
           } else {
@@ -271,10 +272,10 @@ public class LexAn implements AutoCloseable {
           if (buffChar == '"' || buffChar == '\\' || buffChar == 'n') {
             stringBuilder.append((char) buffChar);
             nextChar();
-          } else if (isHexDigit(buffChar)) {
+          } else if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
             stringBuilder.append((char) buffChar);
             nextChar();
-            if (isHexDigit(buffChar)) {
+            if (Character.toString(buffChar).matches("[A-Fa-f09]")) {
               stringBuilder.append((char) buffChar);
               nextChar();
             } else {
@@ -296,10 +297,6 @@ public class LexAn implements AutoCloseable {
     }
 
     throw new Report.Error(new Report.Location(buffCharLine, buffCharColumn), "Unknow character: '%c'!".formatted((char) buffChar));
-  }
-
-  private boolean isHexDigit(int c) {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
   }
 
 	/**
