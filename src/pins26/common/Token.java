@@ -45,6 +45,8 @@ public record Token(Report.Location location, Symbol symbol, String lexeme) impl
 		END,
 		/** Simbol {@code =}. */
 		ASSIGN,
+		/** Simbol {@code ;}. */
+		SEMIC,
 		/** Simbol {@code ,}. */
 		COMMA,
 		/** Simbol {@code &&}. */
@@ -81,8 +83,6 @@ public record Token(Report.Location location, Symbol symbol, String lexeme) impl
 		LPAREN,
 		/** Simbol {@code )}. */
 		RPAREN,
-    /** Symbol {@code ;}. */
-    SEMIC,
 	}
 
 	@Override
