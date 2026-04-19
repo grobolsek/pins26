@@ -44,16 +44,19 @@ class SynAn implements AutoCloseable {
 		return token;
 	}
 
+  private HashMap<AST.Node, Report.Locatable> attrLoc;
+
 	/**
 	 * Opravi sintaksno analizo.
 	 */
-	public void parse() {
-    Report.info("Parsing program.");
-		parseDefinitions();
-		if (lexAn.peekToken().symbol() != Token.Symbol.EOF)
-			throw new Report.Error(lexAn.peekToken(),
-					"Unexpected text '" + lexAn.peekToken().lexeme() + "' at the end of the program.");
-	}
+	public AST.Node parse(HashMap<AST.Node, Report.Locatable> attrLoc) {
+    this.attrLoc = attrLoc;
+    final AST.Nodes<AST.MainDef> defs = parseProgram();
+    if (lexAn.peekToken().symbol() != Token.Symbol.EOF)
+        Report.warning(lexAn.peekToken(),
+            "Unexpected text '" + lexAn.peekToken().lexeme() + "...' at the end of the program.");
+    return defs;
+}
 
 	private void parseDefinitions() {
 		while (DEFINITION_START_SYMBOLS.contains(lexAn.peekToken().symbol())) {
