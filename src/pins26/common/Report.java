@@ -50,6 +50,22 @@ public class Report {
 			return this;
 		}
 
+    /**
+		 * Vrne lokacijo, katere začetna vrstica in stolpec sta enaka končni vrstici in končnem znaku
+		 * @return nova lokacija
+		 */
+		public Location endLocation() {
+			return new Location(endLine, endColumn);
+		}
+    
+    /**
+		 * Vrne lokacijo, katere začetna vrstica in stolpec sta enaka začetni vrstici in začetnemu znaku
+		 * @return nova lokacija
+		 */
+		public Location begLocation() {
+			return new Location(begLine, begColumn);
+		}
+
 	}
 
 	/**
