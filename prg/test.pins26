@@ -1,8 +1,6 @@
+var n = 0
 fun main() =
-  let
-    var a=1
-  in
-    b^=^a;
-    c=0;
-    ^c=0;
-  end;
+  n=5;
+  n=^(n + 3);
+  n^=5;
+  n;

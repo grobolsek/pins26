@@ -517,20 +517,65 @@ public class SemAn {
     private class ResolverVisitor implements AST.FullVisitor<Object, Object> {
 
       @Override
+      public Object visit(AST.AtomExpr atomExpr, Object arg) {
+        attrAST.attrLVal.put(atomExpr, false);
+        return null;
+      }
+
+      @Override
+      public Object visit(AST.VarExpr varExpr, Object arg) {
+        attrAST.attrLVal.put(varExpr, true);
+        return null;
+      }
+
+      @Override
+      public Object visit(AST.CallExpr callExpr, Object arg) {
+        callExpr.args.accept(this, arg);
+        attrAST.attrLVal.put(callExpr, false);
+        return null;
+      }
+
+      @Override
+      public Object visit(AST.BinExpr binExpr, Object arg) {
+        binExpr.fstExpr.accept(this, arg);
+        binExpr.sndExpr.accept(this, arg);
+        attrAST.attrLVal.put(binExpr, false);
+        return null;
+      }
+
+      @Override
+      public Object visit(AST.UnExpr unExpr, Object arg) {
+        unExpr.expr.accept(this, arg);
+
+        switch (unExpr.oper) {
+          case VALUEAT -> {
+            attrAST.attrLVal.put(unExpr, true);
+          }
+          case MEMADDR -> {
+            if (!Boolean.TRUE.equals(attrAST.attrLVal.get(unExpr.expr)))
+              throw new Report.Error(attrAST.attrLoc.get(unExpr.expr),
+                  "Cannot take address of a non-lvalue expression.");
+            attrAST.attrLVal.put(unExpr, false);
+          }
+          default -> {
+            attrAST.attrLVal.put(unExpr, false);
+          }
+        }
+        return null;
+      }
+
+      @Override
       public Object visit(AST.AssignStmt assignStmt, Object arg) {
         assignStmt.dstExpr.accept(this, arg);
         assignStmt.srcExpr.accept(this, arg);
-        final AST.Expr left = assignStmt.dstExpr;
-        if (left instanceof AST.VarExpr
-            || (left instanceof AST.UnExpr unExpr && unExpr.oper == AST.UnExpr.Oper.VALUEAT)) {
-          attrAST.attrLVal.put(left, true);
-          return null;
-        }
-        throw new Report.Error(attrAST.attrLoc.get(assignStmt.dstExpr), "Not a valid address for assignment.");
+
+        if (!Boolean.TRUE.equals(attrAST.attrLVal.get(assignStmt.dstExpr)))
+          throw new Report.Error(attrAST.attrLoc.get(assignStmt.dstExpr),
+              "Not a valid address for assignment.");
+        return null;
       }
     }
   }
-
   // --- ZAGON ---
 
   /**
