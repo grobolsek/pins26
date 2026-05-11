@@ -1,6 +1,14 @@
 var n = 0
 fun main() =
   n=5;
-  n=^(n + 3);
+  n=^(n);
   n^=5;
   n;
+
+fun a() =
+  let
+    var b = 3
+    var c = 5 * 'a'
+  in
+    c;
+  end;
